@@ -11753,7 +11753,7 @@ parseit:
 		    Safefree(name);
 		}
 		RExC_parse = e + 1;
-		namedclass = ANYOF_MAX;  /* no official name, but it's named */
+		namedclass = ANYOF_UNIPROP;  /* no official name, but it's named */
 
 		/* \p means they want Unicode semantics */
 		RExC_uni_semantics = 1;
@@ -12151,8 +12151,7 @@ parseit:
                     DO_N_POSIX(ret, namedclass, posixes,
                                             PL_PosixXDigit, PL_XPosixXDigit);
 		    break;
-		case ANYOF_MAX:
-		    /* this is to handle \p and \P */
+		case ANYOF_UNIPROP: /* this is to handle \p and \P */
 		    break;
 		default:
 		    vFAIL("Invalid [::] class");
@@ -12494,7 +12493,7 @@ parseit:
                     *flagp |= HASWIDTH|SIMPLE;
                     break;
 
-                case ANYOF_MAX:
+                case ANYOF_UNIPROP:
                     break;
 
                 case ANYOF_NBLANK:
