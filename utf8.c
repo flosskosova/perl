@@ -32,6 +32,7 @@
 #define PERL_IN_UTF8_C
 #include "perl.h"
 #include "inline_invlist.c"
+#include "regcharclass.h"
 
 #ifndef EBCDIC
 /* Separate prototypes needed because in ASCII systems these are
@@ -2065,7 +2066,12 @@ Perl_is_utf8_blank(pTHX_ const U8 *p)
 
     PERL_ARGS_ASSERT_IS_UTF8_BLANK;
 
-    return is_utf8_common(p, &PL_utf8_blank, "XPosixBlank");
+    /* There are so few code points in this that we use a macro instead of a
+     * full swash.  But put something in the ptr to the swash, so won't keep
+     * trying to initialize it */
+    PL_utf8_blank = &PL_sv_undef;
+
+    return is_HORIZWS(p, TRUE);
 }
 
 bool
