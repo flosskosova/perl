@@ -2645,7 +2645,8 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
         return NULL;
     }
 
-    {
+    {   /* This code needs to be sync'ed with a regex in _charnames.pm which
+           does the same thing */
         bool problematic = FALSE;
         const char* i = s;
 
