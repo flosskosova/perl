@@ -2622,6 +2622,13 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
     const char *str;
     SV* res = newSVpvn(s, e - s);
 
+    HV * table;
+    SV **cvp;
+    SV *cv;
+    SV *rv;
+    HV *stash;
+    char* name;
+
     PERL_ARGS_ASSERT_GET_AND_CHECK_BACKSLASH_N_NAME;
 
     res = new_constant( NULL, 0, "charnames",
@@ -2631,11 +2638,22 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
         return NULL;
     }
 
-    /* Most likely res will be in utf8 already since the standard charnames
-     * uses pack U, but a custom translator can leave it otherwise, so make
-     * sure.  XXX This can be revisited to not have charnames use utf8 for
-     * characters that don't need it when regexes don't have to be in utf8 for
-     * Unicode semantics.  If doing so, remember EBCDIC */
+    /* See if the charnames handler is the Perl core's, and if so, we can skip
+     * the validation needed for a user-supplied one */
+    table = GvHV(PL_hintgv);		 /* ^H */
+    cvp = hv_fetchs(table, "charnames", FALSE);
+    cv = *cvp;
+    if ((rv = SvRV(cv))
+        && (stash = CvSTASH(rv))
+        && strEQ(HvNAME(stash), "_charnames"))
+    {
+        return res;
+    }
+
+    /* A custom translator can leave res not in UTF-8, so make sure.  XXX This
+     * can be revisited to not use utf8 for characters that don't need it when
+     * regexes don't have to be in utf8 for Unicode semantics.  If doing so,
+     * remember EBCDIC */
     sv_utf8_upgrade(res);
 
     /* Don't accept malformed input */
