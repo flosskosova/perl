@@ -5070,6 +5070,15 @@ off this warning by C<no warnings 'surrogate';>.
 (F) There are no byte-swapping functions for a machine with this byte
 order.
 
+=item Unknown charname '%s'
+
+(F) The name you used inside C<\N{}> is unknown to Perl.  Check the
+spelling.  You can say C<use charnames ":loose"> to not have to be
+so precise about spaces, hyphens, and capitalization on standard Unicode
+names (this doesn't affect any custom aliases that have been created).
+This may also happen if the C<\N{}> is not in scope of the corresponding
+C<use charnames>.
+
 =item Unknown error
 
 (P) Perl was about to print an error message in C<$@>, but the C<$@> variable
