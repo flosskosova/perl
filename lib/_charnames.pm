@@ -169,7 +169,10 @@ sub alias (@) # Set up a single alias
     else {
         # This regex needs to be sync'd with the code in toke.c that checks
         # for the same thing
-        if ($name !~ / ^ \p{Alpha} [-\p{XPosixWord} ():\xa0]*  $ /x) {
+        if ($name !~ / ^ 
+                       \p{_Perl_Charname_Begin}
+                       \p{_Perl_Charname_Continue}*
+                       $ /x) {
           push @errors, $name;
         }
         else {

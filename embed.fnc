@@ -1408,10 +1408,12 @@ EXMpR	|SV*	|_swash_to_invlist	|NN SV* const swash
 EXMpR	|SV*	|_add_range_to_invlist	|NULLOK SV* invlist|const UV start|const UV end
 EXMp	|void	|_invlist_populate_swatch   |NN SV* const invlist|const UV start|const UV end|NN U8* swatch
 #endif
-#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C)
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C) || defined(PERL_IN_TOKE_C)
 EXp	|SV*	|_core_swash_init|NN const char* pkg|NN const char* name \
 		|NN SV* listsv|I32 minbits|I32 none \
 		|NULLOK SV* invlist|NULLOK U8* const flags_p
+#endif
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C)
 EXMpR	|SV*	|_invlist_contents|NN SV* const invlist
 EiMR	|UV*	|_get_invlist_len_addr	|NN SV* invlist
 EiMR	|UV	|_invlist_len	|NN SV* const invlist
@@ -1419,6 +1421,7 @@ EMiR	|bool	|_invlist_contains_cp|NN SV* const invlist|const UV cp
 EXpMR	|IV	|_invlist_search	|NN SV* const invlist|const UV cp
 EXMpR	|SV*	|_get_swash_invlist|NN SV* const swash
 EXMpR	|HV*	|_swash_inversion_hash	|NN SV* const swash
+:EXMpR	|bool	|_is_utf8_buf_foo   |NN const U8 *const p|NN const U8 *const e|const _char_class_number n
 : Not used currently: Mp	|void	|_invlist_dump	|NN SV* const invlist|NN const char * const header
 #endif
 Ap	|void	|taint_env

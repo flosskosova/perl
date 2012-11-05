@@ -603,30 +603,32 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
  * <_HIGHEST_REGCOMP_DOT_H_SYNC> are used by regcomp.h.  These use names used
  * in l1_char_class_tab.h but their actual definitions are here.  If that has a
  * name not used here, it won't compile. */
-#  define _CC_WORDCHAR           0
-#  define _CC_SPACE              1
-#  define _CC_DIGIT              2
-#  define _CC_ALNUMC             3
-#  define _CC_ALPHA              4
-#  define _CC_ASCII              5
-#  define _CC_CNTRL              6
-#  define _CC_GRAPH              7
-#  define _CC_LOWER              8
-#  define _CC_PRINT              9
-#  define _CC_PUNCT             10
-#  define _CC_UPPER             11
-#  define _CC_XDIGIT            12
-#  define _CC_PSXSPC            13
-#  define _CC_BLANK             14
-#  define _CC_VERTSPACE         15
-#  define _HIGHEST_REGCOMP_DOT_H_SYNC _CC_VERTSPACE
+typedef enum {
+    _CC_WORDCHAR        =  0,
+    _CC_SPACE           =  1,
+    _CC_DIGIT           =  2,
+    _CC_ALNUMC          =  3,
+    _CC_ALPHA           =  4,
+    _CC_ASCII           =  5,
+    _CC_CNTRL           =  6,
+    _CC_GRAPH           =  7,
+    _CC_LOWER           =  8,
+    _CC_PRINT           =  9,
+    _CC_PUNCT           = 10,
+    _CC_UPPER           = 11,
+    _CC_XDIGIT          = 12,
+    _CC_PSXSPC          = 13,
+    _CC_BLANK           = 14,
+    _CC_VERTSPACE       = 15,
+    _CC_IDFIRST         = 16,
+    _CC_CHARNAME_CONT   = 17,
+    _CC_NONLATIN1_FOLD  = 18,
+    _CC_QUOTEMETA       = 19,
+    _CC_NON_FINAL_FOLD  = 20,
+    _CC_IS_IN_SOME_FOLD = 21
+} _char_class_number;
 
-#  define _CC_IDFIRST           16
-#  define _CC_CHARNAME_CONT     17
-#  define _CC_NONLATIN1_FOLD    18
-#  define _CC_QUOTEMETA         19
-#  define _CC_NON_FINAL_FOLD    20
-#  define _CC_IS_IN_SOME_FOLD   21
+#  define _HIGHEST_REGCOMP_DOT_H_SYNC _CC_VERTSPACE
 /* Unused: 22-31
  * If more bits are needed, one could add a second word for non-64bit
  * QUAD_IS_INT systems, using some #ifdefs to distinguish between having a 2nd

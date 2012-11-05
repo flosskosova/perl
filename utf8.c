@@ -1964,6 +1964,159 @@ S_is_utf8_common(pTHX_ const U8 *const p, SV **swash,
     return swash_fetch(*swash, p, TRUE) != 0;
 }
 
+#if 0
+bool
+Perl__is_utf8_buf_char_class(pTHX_ const U8 *const p, const U8 *const e, const _char_class_number n)
+{
+    /* returns a boolean giving whether or not the UTF8-encoded character that
+     * starts at <p> is in the swash indicated by <swashname>.  <swash>
+     * contains a pointer to where the swash indicated by <swashname>
+     * is to be stored; which this routine will do, so that future calls will
+     * look at <*swash> and only generate a swash if it is not null
+     *
+     * Note that it is assumed that the buffer length of <p> is enough to
+     * contain all the bytes that comprise the character.  Thus, <*p> should
+     * have been checked before this call for mal-formedness enough to assure
+     * that. */
+
+    SV **swash;
+    const char * swashname;
+    dVAR;
+
+    PERL_ARGS_ASSERT_IS_UTF8_COMMON;
+
+    if (!is_utf8_char_buf(p, e))
+	return FALSE;
+
+    switch (n) {
+        case _CC_WORDCHAR:
+            swash = &PL_utf8_alnum;
+            swashname = "IsWord";
+            break;
+
+        case _CC_SPACE:
+            swash = &PL_utf8_space;
+            swashname = "IsXPerlSpace";
+            break;
+
+        case _CC_DIGIT:
+            swash = &PL_utf8_digit;
+            swashname = "IsDigit";
+            break;
+
+        case _CC_ALNUMC:
+            swash = &PL_utf8_alnum;
+            //
+            swashname = "IsWord";
+            break;
+
+        case _CC_ALPHA:
+            swash = &PL_utf8_alpha;
+            swashname = "IsAlpha";
+            break;
+
+        case _CC_ASCII: //
+            swash = &PL_utf8_alnum;
+            swashname = "IsWord";
+            break;
+
+        case _CC_CNTRL:
+            //
+            swash = &PL_utf8_alnum;
+            swashname = "IsWord";
+            break;
+
+        case _CC_GRAPH:
+            swash = &PL_utf8_graph;
+            swashname = "IsGraph";
+            break;
+
+        case _CC_LOWER:
+            swash = &PL_utf8_lower;
+            swashname = "IsLower";
+            break;
+
+        case _CC_PRINT:
+            swash = &PL_utf8_print;
+            swashname = "IsPrint";
+            break;
+
+        case _CC_PUNCT:
+            swash = &PL_utf8_punct;
+            swashname = "IsPunct";
+            break;
+
+        case _CC_UPPER:
+            swash = &PL_utf8_upper;
+            swashname = "IsUpper";
+            break;
+
+        case _CC_XDIGIT:
+            swash = &PL_utf8_xdigit;
+            swashname = "IsXdigit";
+            break;
+
+        case _CC_PSXSPC:
+            swash = &PL_utf8_alnum;
+            //
+            swashname = "IsWord";
+            break;
+
+        case _CC_BLANK:
+            swash = &PL_utf8_blank;
+            swashname = "IsWord";
+            break;
+
+        case _CC_VERTSPACE:
+            swash = &PL_utf8_alnum;
+            swashname = "IsWord";
+            break;
+
+        case _CC_IDFIRST:
+            swash = &PL_utf8_idstart;
+            swashname = "IsWord";
+            break;
+
+        case _CC_CHARNAME_CONT:
+            swash = &PL_utf8_alnum;
+            swashname = "IsWord";
+            break;
+
+        case _CC_NONLATIN1_FOLD:
+            swash = &PL_utf8_alnum;
+            swashname = "IsWord";
+            break;
+
+        case _CC_QUOTEMETA:
+            swash = &PL_utf8_alnum;
+            swashname = "IsWord";
+            break;
+
+        case _CC_NON_FINAL_FOLD:
+            swash = &PL_utf8_alnum;
+            swashname = "IsWord";
+            break;
+
+        case _CC_IS_IN_SOME_FOLD:
+            swash = &PL_utf8_alnum;
+            swashname = "IsWord";
+            break;
+
+    }
+
+    /* The API should have included a length for the UTF-8 character in <p>,
+     * but it doesn't.  We therefor assume that p has been validated at least
+     * as far as there being enough bytes available in it to accommodate the
+     * character without reading beyond the end, and pass that number on to the
+     * validating routine */
+    if (!*swash) {
+        U8 flags = _CORE_SWASH_INIT_ACCEPT_INVLIST;
+        *swash = _core_swash_init("utf8", swashname, &PL_sv_undef, 1, 0, NULL, &flags);
+    }
+    return swash_fetch(*swash, p, TRUE) != 0;
+}
+#endif
+
 bool
 Perl_is_utf8_alnum(pTHX_ const U8 *p)
 {
@@ -3897,6 +4050,20 @@ Perl__swash_to_invlist(pTHX_ SV* const swash)
     HV *const hv = MUTABLE_HV(SvRV(swash));
     UV elements = 0;    /* Number of elements in the inversion list */
     U8 empty[] = "";
+    SV** listsvp;
+    SV** typesvp;
+    SV** bitssvp;
+    SV** extssvp;
+    SV** invert_it_svp;
+    SV* invlist;
+
+    U8* typestr;
+    STRLEN bits;
+    STRLEN octets; /* if bits == 1, then octets == 0 */
+    U8 *x, *xend;
+    STRLEN xcur;
+
+    PERL_ARGS_ASSERT__SWASH_TO_INVLIST;
 
     /* If not a hash, it must be the swash's inversion list instead */
     if (SvTYPE(hv) != SVt_PVHV) {
@@ -3904,21 +4071,16 @@ Perl__swash_to_invlist(pTHX_ SV* const swash)
     }
 
     /* The string containing the main body of the table */
-    SV** const listsvp = hv_fetchs(hv, "LIST", FALSE);
-    SV** const typesvp = hv_fetchs(hv, "TYPE", FALSE);
-    SV** const bitssvp = hv_fetchs(hv, "BITS", FALSE);
-    SV** const extssvp = hv_fetchs(hv, "EXTRAS", FALSE);
-    SV** const invert_it_svp = hv_fetchs(hv, "INVERT_IT", FALSE);
+    listsvp = hv_fetchs(hv, "LIST", FALSE);
+    typesvp = hv_fetchs(hv, "TYPE", FALSE);
+    bitssvp = hv_fetchs(hv, "BITS", FALSE);
+    extssvp = hv_fetchs(hv, "EXTRAS", FALSE);
+    invert_it_svp = hv_fetchs(hv, "INVERT_IT", FALSE);
 
-    const U8* const typestr = (U8*)SvPV_nolen(*typesvp);
-    const STRLEN bits  = SvUV(*bitssvp);
-    const STRLEN octets = bits >> 3; /* if bits == 1, then octets == 0 */
-    U8 *x, *xend;
-    STRLEN xcur;
+    typestr = (U8*)SvPV_nolen(*typesvp);
+    bits  = SvUV(*bitssvp);
+    octets = bits >> 3; /* if bits == 1, then octets == 0 */
 
-    SV* invlist;
-
-    PERL_ARGS_ASSERT__SWASH_TO_INVLIST;
 
     /* read $swash->{LIST} */
     if (SvPOK(*listsvp)) {

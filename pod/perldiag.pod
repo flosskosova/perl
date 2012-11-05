@@ -1636,14 +1636,6 @@ there are neither package declarations nor a C<$VERSION>.
 long for Perl to handle.  You have to be seriously twisted to write code
 that triggers this error.
 
-=item Deprecated character in \N{...}; marked by <-- HERE  in \N{%s<-- HERE %s
-
-(D deprecated) Just about anything is legal for the C<...> in C<\N{...}>.
-But starting in 5.12, non-reasonable ones that don't look like names
-are deprecated.  A reasonable name begins with an alphabetic character
-and continues with any combination of alphanumerics, dashes, spaces,
-parentheses or colons.
-
 =item Deprecated use of my() in false conditional
 
 (D deprecated) You used a declaration similar to C<my $x if 0>.  There
@@ -2374,7 +2366,7 @@ recognized by Perl or by a user-supplied handler.  See L<attributes>.
 the C<:alias> option to C<use charnames> and the specified character in
 the indicated name isn't valid.  See L<charnames/CUSTOM ALIASES>.
 
-=item Invalid character in \N{...}; marked by <-- HERE in \N{%s
+=item Invalid character in \N{...}; marked by <-- HERE in \N{%s}
 
 (F) Only certain characters are valid for character names.  The
 indicated one isn't.  See L<charnames/CUSTOM ALIASES>.
